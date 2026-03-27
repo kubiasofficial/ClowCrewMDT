@@ -146,29 +146,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const webhookUrl = document.getElementById('webhookUrl').value.trim();
             const msgText = document.getElementById('msgText').value.trim();
             const msgFile = document.getElementById('msgFile').files[0];
-            // Odeslat embed na webhook
+            // Krásný embed
             const embed = {
                 embeds: [{
-                    title: 'Zpráva z CCD',
+                    title: '💬 Nová zpráva z ClowCrew Databáze',
                     description: msgText,
-                    color: 65280,
-                    footer: { text: `Odeslal: ${loggedUser ? loggedUser.name : 'neznámý'}` }
+                    color: 0x00ffb3,
+                    footer: { text: `ClowCrew MDT • Odeslal: ${loggedUser ? loggedUser.name : 'neznámý'}` },
+                    timestamp: new Date().toISOString()
                 }]
             };
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(embed)
-            }).then(() => {
-                if (msgFile) {
-                    const formData = new FormData();
-                    formData.append('file', msgFile);
-                    fetch(webhookUrl, {
-                        method: 'POST',
-                        body: formData
-                    });
-                }
-            });
+            if (msgFile) {
+                const formData = new FormData();
+                formData.append('file', msgFile);
+                formData.append('payload_json', JSON.stringify({ username: 'ClowCrew Databáze', embeds: embed.embeds }));
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+            } else {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'ClowCrew Databáze', embeds: embed.embeds })
+                });
+            }
             closeModal('modalSendMsg');
             sendMsgForm.reset();
             alert('Zpráva byla odeslána.');
@@ -238,11 +240,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const folderName = document.getElementById('folderName').value.trim();
             const folderReason = document.getElementById('folderReason').value.trim();
             if (!folderName || !folderReason) return;
-            const msg = `Uživatel ${loggedUser ? loggedUser.name : 'neznámý'} žádá o vytvoření složky s názvem ${folderName} a důvodem: ${folderReason}`;
+            const embed = {
+                username: 'ClowCrew Databáze',
+                embeds: [{
+                    title: '📁 Žádost o složku',
+                    description: `Uživatel **${loggedUser ? loggedUser.name : 'neznámý'}** žádá o vytvoření složky s názvem **${folderName}**\n**Důvod:** ${folderReason}`,
+                    color: 0x00ffb3,
+                    footer: { text: 'ClowCrew MDT • Automatická žádost' },
+                    timestamp: new Date().toISOString()
+                }]
+            };
             fetch('https://discord.com/api/webhooks/1486805284537110691/FSmwXgfZNTyUERk1rt_kP3IszMvntGDGDnldjGmhfJCnuYwQ_VCrNoWdHbWp871-0o84', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: msg })
+                body: JSON.stringify(embed)
             });
             closeModal('modalRequestFolder');
             requestFolderForm.reset();
@@ -281,26 +292,29 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const addonText = document.getElementById('addonText').value.trim();
             const addonFile = document.getElementById('addonFile').files[0];
-            let msg = `Uživatel ${loggedUser ? loggedUser.name : 'neznámý'} žádá o upravu či dodatek složky (${currentFolder}). Doplnkové informace jsou tyto: ${addonText}`;
+            const embed = {
+                username: 'ClowCrew Databáze',
+                embeds: [{
+                    title: '📝 Žádost o dodatek',
+                    description: `Uživatel **${loggedUser ? loggedUser.name : 'neznámý'}** žádá o úpravu či dodatek složky (${currentFolder}).\n**Doplňující informace:** ${addonText}`,
+                    color: 0x00ffb3,
+                    footer: { text: 'ClowCrew MDT • Automatická žádost' },
+                    timestamp: new Date().toISOString()
+                }]
+            };
             if (addonFile) {
-                // Pokud je obrázek, pošleme nejdřív text a pak obrázek jako další zprávu
+                const formData = new FormData();
+                formData.append('file', addonFile);
+                formData.append('payload_json', JSON.stringify(embed));
                 fetch('https://discord.com/api/webhooks/1486806298350583922/3H1hIfUBvYa9O6_v2o0v5FkzInv-Sa6sqCxDMKlxIkXvDX0XztMO8T4pN6uiCIGYA4_3', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: msg })
-                }).then(() => {
-                    const formData = new FormData();
-                    formData.append('file', addonFile);
-                    fetch('https://discord.com/api/webhooks/1486806298350583922/3H1hIfUBvYa9O6_v2o0v5FkzInv-Sa6sqCxDMKlxIkXvDX0XztMO8T4pN6uiCIGYA4_3', {
-                        method: 'POST',
-                        body: formData
-                    });
+                    body: formData
                 });
             } else {
                 fetch('https://discord.com/api/webhooks/1486806298350583922/3H1hIfUBvYa9O6_v2o0v5FkzInv-Sa6sqCxDMKlxIkXvDX0XztMO8T4pN6uiCIGYA4_3', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: msg })
+                    body: JSON.stringify(embed)
                 });
             }
             closeModal('modalRequestAddon');
