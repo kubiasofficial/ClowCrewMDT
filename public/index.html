@@ -42,6 +42,7 @@
             <input type="password" id="pin" placeholder="PIN" required><br>
             <button type="submit">Přihlásit</button>
         </form>
+        <button id="addUserBtn" style="margin-top:18px;">Přidat uživatele (test)</button>
         <div id="loginError" class="error"></div>
         <div class="terminal-footer">Přístup pouze pro autorizované osoby</div>
     </div>
@@ -155,6 +156,35 @@
         <div class="terminal-footer">Všechna data jsou šifrována • Neoprávněný přístup je trestný</div>
     </div>
     <script src="script.js"></script>
+            <script>
+            // Přidání uživatele do Firebase
+            function addUserToFirebase(name, pin) {
+                firebase.database().ref('users/' + name).set({
+                    name: name,
+                    pin: pin
+                });
+            }
+            // Načtení všech uživatelů z Firebase
+            function getUsersFromFirebase(callback) {
+                firebase.database().ref('users').once('value').then(snapshot => {
+                    callback(snapshot.val());
+                });
+            }
+            // Testovací tlačítko pro přidání uživatele
+            document.addEventListener('DOMContentLoaded', function() {
+                const addUserBtn = document.getElementById('addUserBtn');
+                if (addUserBtn) {
+                    addUserBtn.onclick = function() {
+                        const name = prompt('Zadej jméno uživatele:');
+                        const pin = prompt('Zadej PIN:');
+                        if (name && pin) {
+                            addUserToFirebase(name, pin);
+                            showNotification('Uživatel přidán do databáze!');
+                        }
+                    };
+                }
+            });
+            </script>
         <script>
         // Matrix animace pozadí
         const canvas = document.getElementById('matrix-bg');
