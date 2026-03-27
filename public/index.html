@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClowCrew Databáze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -71,8 +74,8 @@
                 </div>
         <div id="locationsSection" style="display:none; width:100%; max-width:1000px; margin:0 auto;">
             <h2 style="margin-top:32px; color:#00ffb3;">Mapa GTA 5 (statický obrázek)</h2>
-            <div style="width:800px; max-width:100%; margin:0 auto; position:relative;">
-                <img src="gtamap.png" alt="Mapa GTA 5" style="width:100%; border-radius:12px; box-shadow:0 0 24px #00ffb355;">
+            <div class="zoom-pan-container">
+                <img id="zoomPanImg" src="gtamap.png" alt="Mapa GTA 5" class="zoom-pan-img">
             </div>
         </div>
         <div id="foldersSection" class="folders-section-custom" style="display:none; width:100%; max-width:420px; margin:0 auto;">
@@ -126,5 +129,50 @@
         <div class="terminal-footer">Všechna data jsou šifrována • Neoprávněný přístup je trestný</div>
     </div>
     <script src="script.js"></script>
+    <script>
+    // Zoom & Pan pro mapu
+    (function() {
+        const img = document.getElementById('zoomPanImg');
+        if (!img) return;
+        let scale = 1, originX = 0, originY = 0, startX = 0, startY = 0, isDragging = false;
+        const container = img.parentElement;
+        img.style.transformOrigin = '0 0';
+
+        function setTransform() {
+            img.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+        }
+
+        img.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX - originX;
+            startY = e.clientY - originY;
+            img.style.cursor = 'grabbing';
+        });
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            originX = e.clientX - startX;
+            originY = e.clientY - startY;
+            setTransform();
+        });
+        window.addEventListener('mouseup', function() {
+            isDragging = false;
+            img.style.cursor = 'grab';
+        });
+        container.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const prevScale = scale;
+            scale += e.deltaY < 0 ? 0.1 : -0.1;
+            scale = Math.max(0.5, Math.min(3, scale));
+            // Zoom na kurzor
+            const rect = img.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            originX -= (cx / prevScale - cx / scale);
+            originY -= (cy / prevScale - cy / scale);
+            setTransform();
+        }, { passive: false });
+        img.style.cursor = 'grab';
+    })();
+    </script>
 </body>
 </html>
