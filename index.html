@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClowCrew Databáze</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="noise"></div>
+    <div id="loader" class="terminal-frame">
+        <div class="terminal-header">PŘÍSTUP K SYSTÉMU CLOWCREW</div>
+        <div class="loader-text" id="loaderText">Inicializace spojení...</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+        <div class="terminal-footer" id="loaderFooter"></div>
+    </div>
+    <div id="login" class="terminal-frame" style="display:none;">
+        <div class="terminal-header">CLOWCREW DATABASE LOGIN</div>
+        <div class="terminal-prompt">Zadejte přihlašovací údaje:</div>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Jméno" autocomplete="off" required><br>
+            <input type="password" id="pin" placeholder="PIN" required><br>
+            <button type="submit">Přihlásit</button>
+        </form>
+        <div id="loginError" class="error"></div>
+        <div class="terminal-footer">Přístup pouze pro autorizované osoby</div>
+    </div>
+    <div id="main" class="terminal-frame" style="display:none;">
+        <div class="topbar">
+            <button id="backBtn">Zpět</button>
+            <button id="logoutBtn">Odhlásit se</button>
+        </div>
+        <div class="terminal-header">CLOWCREW DATABASE</div>
+        <div class="terminal-prompt" id="welcomeText">Vítejte v systému. Vyberte akci:</div>
+        <div class="terminal-btns">
+            <button id="foldersBtn">Složky</button>
+            <button id="tasksBtn">Úkoly</button>
+            <button id="locationsBtn">Lokace</button>
+            <button id="adminBtn" style="display:none;">Správa CCD</button>
+        </div>
+                <!-- Sekce správa CCD -->
+                <div id="adminSection" style="display:none; width:100%; max-width:420px; margin:0 auto;">
+                    <h2 style="margin-top:32px; color:#00ffb3;">Správa CCD</h2>
+                    <button id="sendMsgBtn">Pošli zprávu</button>
+                    <div id="adminUsers" style="margin-top:24px;">
+                        <h3 style="color:#00ffb3;">Uživatelé a hesla</h3>
+                        <ul style="color:#00ffb3;">
+                            <li>Jméno: Jinx | PIN: 2811</li>
+                            <li>Jméno: Jesster | PIN: 1128</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Modální okno pro správu CCD - poslat zprávu -->
+                <div id="modalSendMsg" class="modal-overlay" style="display:none;">
+                    <div class="modal">
+                        <button class="modal-close" onclick="closeModal('modalSendMsg')">×</button>
+                        <h2>Pošli zprávu na Webhook</h2>
+                        <form id="sendMsgForm">
+                            <label for="webhookUrl">Webhook URL:</label>
+                            <input type="text" id="webhookUrl" name="webhookUrl" required>
+                            <label for="msgText">Text zprávy:</label>
+                            <textarea id="msgText" name="msgText" required></textarea>
+                            <label for="msgFile">Přiložit obrázek (volitelné):</label>
+                            <input type="file" id="msgFile" name="msgFile" accept="image/*">
+                            <div class="modal-actions">
+                                <button type="submit">Odeslat</button>
+                                <button type="button" onclick="closeModal('modalSendMsg')">Zrušit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        <div id="locationsSection" style="display:none; width:100%; max-width:1000px; margin:0 auto;">
+            <h2 style="margin-top:32px; color:#00ffb3;">Interaktivní mapa GTA 5 (postal kódy)</h2>
+            <iframe src="public/oulsen_satmap-main/index.html" width="1000" height="700" style="width:100%; max-width:1000px; min-height:500px; border-radius:12px; border:2px solid #00ffb3; box-shadow:0 0 24px #00ffb355; background:#101014;"></iframe>
+        </div>
+        <div id="foldersSection" class="folders-section-custom" style="display:none; width:100%; max-width:420px; margin:0 auto;">
+            <h2 style="margin-top:32px; color:#00ffb3;">Složky</h2>
+            <button id="requestFolderBtn">Žádost o složku</button>
+            <ul id="foldersList" style="list-style:none; padding:0; margin:18px 0 0 0;">
+                <li><button class="folderBtn" data-folder="Emerald">Emerald</button></li>
+                <li><button class="folderBtn" data-folder="Rex">Rex</button></li>
+                <li><button class="folderBtn" data-folder="lsc">lsc</button></li>
+            </ul>
+        </div>
+        <div id="folderContentSection" style="display:none; width:100%; max-width:420px; margin:0 auto;">
+            <h2 id="folderTitle" style="margin-top:32px; color:#00ffb3;"></h2>
+            <div id="folderContent"></div>
+            <button id="requestAddonBtn">Žádost o dodatek</button>
+        </div>
+            <!-- Modální okno pro žádost o složku -->
+            <div id="modalRequestFolder" class="modal-overlay" style="display:none;">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal('modalRequestFolder')">×</button>
+                    <h2>Žádost o složku</h2>
+                    <form id="requestFolderForm">
+                        <label for="folderName">Název složky:</label>
+                        <input type="text" id="folderName" name="folderName" required>
+                        <label for="folderReason">Důvod:</label>
+                        <textarea id="folderReason" name="folderReason" required></textarea>
+                        <div class="modal-actions">
+                            <button type="submit">Odeslat</button>
+                            <button type="button" onclick="closeModal('modalRequestFolder')">Zrušit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Modální okno pro žádost o dodatek -->
+            <div id="modalRequestAddon" class="modal-overlay" style="display:none;">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal('modalRequestAddon')">×</button>
+                    <h2>Žádost o dodatek</h2>
+                    <form id="requestAddonForm">
+                        <label for="addonText">Co chceš přidat (text, popis):</label>
+                        <textarea id="addonText" name="addonText" required></textarea>
+                        <label for="addonFile">Přiložit obrázek (volitelné):</label>
+                        <input type="file" id="addonFile" name="addonFile" accept="image/*">
+                        <div class="modal-actions">
+                            <button type="submit">Odeslat</button>
+                            <button type="button" onclick="closeModal('modalRequestAddon')">Zrušit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <div class="terminal-footer">Všechna data jsou šifrována • Neoprávněný přístup je trestný</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
