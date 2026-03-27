@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClowCrew Databáze – Přihlášení</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="matrix-bg"></canvas>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>ClowCrew Database</h1>
+            <form id="loginForm">
+                <input type="text" id="loginId" placeholder="ID" autocomplete="off" required><br>
+                <input type="password" id="loginPass" placeholder="Heslo" required><br>
+                <button type="submit">Přihlásit se</button>
+            </form>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+    <!-- Firebase SDK (modular, Firestore) -->
+    <script type="module" src="firebase-init.js"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html>
