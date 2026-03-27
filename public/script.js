@@ -38,13 +38,6 @@ window.onload = function() {
     nextStep();
 };
 
-// Přihlašování
-const users = [
-    { name: 'Jinx', pin: '2811' },
-    { name: 'Jesster', pin: '1128' }
-];
-
-
 let loggedUser = null;
 let currentFolder = null;
 
@@ -99,28 +92,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const requestAddonForm = document.getElementById('requestAddonForm');
     const tasksBtn = document.getElementById('tasksBtn');
 
-    // Přihlášení
+    // Přihlášení přes Firebase
     form.onsubmit = function(e) {
         e.preventDefault();
         const username = document.getElementById('username').value.trim();
         const pin = document.getElementById('pin').value.trim();
-        const user = users.find(u => u.name === username && u.pin === pin);
-        if (user) {
-            loggedUser = user;
-            login.style.display = 'none';
-            main.style.display = 'flex';
-            typeWriter(welcomeText, `Vítej, ${user.name}! Vyber akci:`);
-            errorDiv.textContent = '';
-            if (adminBtn) {
-                if (user.name === 'Jinx' || user.name === 'Jesster') {
-                    adminBtn.style.display = '';
-                } else {
-                    adminBtn.style.display = 'none';
+        firebase.database().ref('users/' + username).once('value').then(snap => {
+            const user = snap.val();
+            if (user && user.pin === pin) {
+                loggedUser = user;
+                login.style.display = 'none';
+                main.style.display = 'flex';
+                typeWriter(welcomeText, `Vítej, ${user.name}! Vyber akci:`);
+                errorDiv.textContent = '';
+                updateLoggedUserInfo(user.name);
+                if (adminBtn) {
+                    if (user.name === 'Jinx' || user.name === 'Jesster') {
+                        adminBtn.style.display = '';
+                    } else {
+                        adminBtn.style.display = 'none';
+                    }
                 }
+            } else {
+                errorDiv.textContent = 'Neplatné jméno nebo PIN!';
+                updateLoggedUserInfo('');
             }
-        } else {
-            errorDiv.textContent = 'Neplatné jméno nebo PIN!';
-        }
+        });
     };
     // Správa CCD tlačítko
     if (adminBtn) {
@@ -209,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tasksBtn.style.display = '';
             foldersBtn.style.display = '';
             if (adminBtn) adminBtn.style.display = 'none';
+            updateLoggedUserInfo('');
         };
     }
 

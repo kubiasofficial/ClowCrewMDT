@@ -42,8 +42,8 @@
             <input type="password" id="pin" placeholder="PIN" required><br>
             <button type="submit">Přihlásit</button>
         </form>
-        <button id="addUserBtn" style="margin-top:18px;">Přidat uživatele (test)</button>
         <div id="loginError" class="error"></div>
+        <div id="loggedUserInfo" style="margin-top:10px; color:#00ffb3;"></div>
         <div class="terminal-footer">Přístup pouze pro autorizované osoby</div>
     </div>
     <div id="main" class="terminal-frame" style="display:none;">
@@ -64,11 +64,13 @@
                     <h2 style="margin-top:32px; color:#00ffb3;">Správa CCD</h2>
                     <button id="sendMsgBtn">Pošli zprávu</button>
                     <div id="adminUsers" style="margin-top:24px;">
-                        <h3 style="color:#00ffb3;">Uživatelé a hesla</h3>
-                        <ul style="color:#00ffb3;">
-                            <li>Jméno: Jinx | PIN: 2811</li>
-                            <li>Jméno: Jesster | PIN: 1128</li>
-                        </ul>
+                        <h3 style="color:#00ffb3;">Správa členů</h3>
+                        <form id="addMemberForm" style="margin-bottom:12px;">
+                            <input type="text" id="newMemberName" placeholder="Jméno" required style="width:110px;">
+                            <input type="password" id="newMemberPin" placeholder="PIN" required style="width:70px;">
+                            <button type="submit">Přidat</button>
+                        </form>
+                        <ul id="membersList" style="color:#00ffb3; list-style:none; padding:0; margin:0;"></ul>
                     </div>
                 </div>
                 <!-- Modální okno pro správu CCD - poslat zprávu -->
@@ -156,6 +158,54 @@
         <div class="terminal-footer">Všechna data jsou šifrována • Neoprávněný přístup je trestný</div>
     </div>
     <script src="script.js"></script>
+                <script>
+                // --- Správa členů (Firebase) ---
+                function addUserToFirebase(name, pin) {
+                    firebase.database().ref('users/' + name).set({ name, pin });
+                }
+                function removeUserFromFirebase(name) {
+                    firebase.database().ref('users/' + name).remove();
+                }
+                function getUsersFromFirebase(callback) {
+                    firebase.database().ref('users').once('value').then(snap => callback(snap.val()));
+                }
+                function renderMembersList() {
+                    getUsersFromFirebase(users => {
+                        const ul = document.getElementById('membersList');
+                        if (!ul) return;
+                        ul.innerHTML = '';
+                        if (!users) return;
+                        Object.keys(users).forEach(name => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<b>${name}</b> <span style='font-size:0.9em;opacity:0.7;'>| PIN: ${users[name].pin}</span> <button style='margin-left:8px;' onclick="removeUserFromFirebase('${name}'); setTimeout(renderMembersList, 400); showNotification('Uživatel odebrán!');">🗑️</button>`;
+                            ul.appendChild(li);
+                        });
+                    });
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    const addMemberForm = document.getElementById('addMemberForm');
+                    if (addMemberForm) {
+                        addMemberForm.onsubmit = function(e) {
+                            e.preventDefault();
+                            const name = document.getElementById('newMemberName').value.trim();
+                            const pin = document.getElementById('newMemberPin').value.trim();
+                            if (name && pin) {
+                                addUserToFirebase(name, pin);
+                                showNotification('Uživatel přidán!');
+                                setTimeout(renderMembersList, 400);
+                                addMemberForm.reset();
+                            }
+                        };
+                    }
+                    renderMembersList();
+                });
+                // Zobrazit jméno přihlášeného uživatele
+                function updateLoggedUserInfo(name) {
+                    const el = document.getElementById('loggedUserInfo');
+                    if (el) el.textContent = name ? `Přihlášen: ${name}` : '';
+                }
+                // Při úspěšném přihlášení volat updateLoggedUserInfo(user.name)
+                </script>
             <script>
             // Přidání uživatele do Firebase
             function addUserToFirebase(name, pin) {
