@@ -162,6 +162,56 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+}
+
+#matrix-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.18;
+}
+
+.notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #101014;
+    color: #00ffb3;
+    border: 2px solid #00ffb3;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 1.1em;
+    box-shadow: 0 0 16px #00ffb355;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.notification.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 700px) {
+    .terminal-frame, .folders-section-custom, #locationsSection, #folderContentSection, #adminSection {
+        max-width: 98vw !important;
+        width: 98vw !important;
+        font-size: 0.98em;
+    }
+    .zoom-pan-container {
+        width: 98vw !important;
+        min-width: 0 !important;
+    }
+    table {
+        font-size: 0.95em;
+    }
+    .topbar button, .terminal-btns button {
+        font-size: 1em !important;
+        padding: 8px 12px !important;
+    }
+}
 
 .zoom-pan-container {
     width: 800px;
@@ -181,7 +231,7 @@ body {
     user-select: none;
     transition: box-shadow 0.2s;
 }
-}
+/* konec media query */
 
 .terminal-frame {
     background: rgba(10, 10, 18, 0.98);

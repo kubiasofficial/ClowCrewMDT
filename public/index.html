@@ -10,7 +10,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <canvas id="matrix-bg"></canvas>
     <div id="noise"></div>
+    <div id="notification" class="notification"></div>
     <div id="loader" class="terminal-frame">
         <div class="terminal-header">PŘÍSTUP K SYSTÉMU CLOWCREW</div>
         <div class="loader-text" id="loaderText">Inicializace spojení...</div>
@@ -72,11 +74,20 @@
                         </form>
                     </div>
                 </div>
-        <div id="locationsSection" style="display:none; width:100%; max-width:1000px; margin:0 auto;">
-            <h2 style="margin-top:32px; color:#00ffb3;">Mapa GTA 5 (statický obrázek)</h2>
-            <div class="zoom-pan-container">
-                <img id="zoomPanImg" src="gtamap.png" alt="Mapa GTA 5" class="zoom-pan-img">
-            </div>
+        <div id="locationsSection" style="display:none; width:100%; max-width:600px; margin:0 auto;">
+            <h2 style="margin-top:32px; color:#00ffb3;">Lokace a Postal kódy</h2>
+            <table id="locationsTable" style="width:100%; border-collapse:collapse; background:#18181c; color:#00ffb3; border-radius:8px; overflow:hidden;">
+                <thead>
+                    <tr style="background:#101014;">
+                        <th style="padding:10px 8px; border-bottom:2px solid #00ffb3;">Místo / Osoba</th>
+                        <th style="padding:10px 8px; border-bottom:2px solid #00ffb3;">Postal Code</th>
+                    </tr>
+                </thead>
+                <tbody id="locationsTableBody">
+                    <!-- Dynamicky generované řádky -->
+                </tbody>
+            </table>
+            <input id="locationSearch" type="text" placeholder="Vyhledat místo/osobu nebo postal..." style="width:100%;margin-top:18px;padding:8px 12px;background:#101014;color:#00ffb3;border:1px solid #00ffb3;border-radius:6px;outline:none;">
         </div>
         <div id="foldersSection" class="folders-section-custom" style="display:none; width:100%; max-width:420px; margin:0 auto;">
             <h2 style="margin-top:32px; color:#00ffb3;">Složky</h2>
@@ -129,6 +140,86 @@
         <div class="terminal-footer">Všechna data jsou šifrována • Neoprávněný přístup je trestný</div>
     </div>
     <script src="script.js"></script>
+        <script>
+        // Matrix animace pozadí
+        const canvas = document.getElementById('matrix-bg');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
+            let cols = Math.floor(w / 18);
+            let ypos = Array(cols).fill(0);
+            function matrix() {
+                ctx.fillStyle = '#10101455';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#00ffb3';
+                ctx.font = '16px Share Tech Mono, monospace';
+                ypos.forEach((y, ind) => {
+                    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+                    ctx.fillText(text, ind * 18, y);
+                    if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                    else ypos[ind] = y + 18;
+                });
+            }
+            setInterval(matrix, 60);
+            window.addEventListener('resize', () => {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w;
+                canvas.height = h;
+                cols = Math.floor(w / 18);
+                ypos.length = cols;
+                ypos.fill(0);
+            });
+        }
+
+        // Notifikace
+        function showNotification(msg) {
+            const n = document.getElementById('notification');
+            if (!n) return;
+            n.textContent = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 2600);
+        }
+
+        // Vyhledávání v tabulce Lokace
+        const locations = [
+            { name: 'Legion Square', postal: '801' },
+            { name: 'Sandy Shores', postal: '301' },
+            { name: 'Paleto Bay', postal: '501' },
+            { name: 'Vespucci Beach', postal: '805' },
+            { name: 'Harmony', postal: '401' },
+            { name: 'Grove Street', postal: '904' },
+            { name: 'Mirror Park', postal: '702' },
+            { name: 'Jinx', postal: '???' },
+            { name: 'Jesster', postal: '???' }
+        ];
+        function renderLocationsTable(filter = '') {
+            const tbody = document.getElementById('locationsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            locations.filter(loc =>
+                loc.name.toLowerCase().includes(filter.toLowerCase()) ||
+                loc.postal.toLowerCase().includes(filter.toLowerCase())
+            ).forEach(loc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td style="padding:8px 6px; border-bottom:1px solid #00ffb355;">${loc.name}</td><td style="padding:8px 6px; border-bottom:1px solid #00ffb355;">${loc.postal}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        renderLocationsTable();
+        const locationSearch = document.getElementById('locationSearch');
+        if (locationSearch) {
+            locationSearch.addEventListener('input', function() {
+                renderLocationsTable(this.value);
+            });
+        }
+
+        // Ukázková notifikace po načtení (lze volat showNotification odkudkoliv)
+        // showNotification('Vítej v systému ClowCrew!');
+        </script>
     <script>
     // Zoom & Pan pro mapu
     (function() {
