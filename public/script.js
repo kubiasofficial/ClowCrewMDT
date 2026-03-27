@@ -43,7 +43,16 @@ document.getElementById('loginForm').onsubmit = function(e) {
         errorDiv.textContent = 'Vyplňte ID i heslo!';
         return;
     }
-    // Zde později napojení na backend/Firebase
-    errorDiv.textContent = '';
-    alert('Přihlášení úspěšné! (zatím pouze demo)');
+    db.ref('users/' + id).once('value').then(snap => {
+        const user = snap.val();
+        if (user && user.password === pass) {
+            errorDiv.textContent = '';
+            alert('Přihlášení úspěšné! Vítej, ' + user.id + '.');
+            // Zde můžeš přesměrovat nebo zobrazit další obsah
+        } else {
+            errorDiv.textContent = 'Neplatné ID nebo heslo!';
+        }
+    }).catch(() => {
+        errorDiv.textContent = 'Chyba při ověřování.';
+    });
 };
